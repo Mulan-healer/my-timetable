@@ -1,0 +1,88 @@
+{
+  "days": ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"],
+  "periods": [
+    { "name": "1 - 2", "time": "08:30-10:05" },
+    { "name": "3 - 4", "time": "10:25-12:00" },
+    { "name": "5 - 6", "time": "14:30-16:05" },
+    { "name": "7 - 8", "time": "16:25-18:00" },
+    { "name": "9 - 10", "time": "19:30-21:05" }
+  ],
+  "schedule": [
+    [
+      [{ "name": "形势与政策(VI)", "teacher": "张鹏伟", "weeks": "12-15周", "weekRange": [[12, 15]], "location": "B-406", "type": "theory" }],
+      [{ "name": "光电检测技术", "teacher": "李仙丽", "weeks": "1-7, 10-15周", "weekRange": [[1, 7], [10, 15]], "location": "信远I-417", "type": "theory" }],
+      [],
+      [{ "name": "虚拟仪器设计", "teacher": "贺华", "weeks": "7-15周", "weekRange": [[7, 15]], "location": "信远I-407", "type": "theory" }],
+      [],
+      [
+        { "name": "单片机测量设计实验", "teacher": "白小平", "weeks": "2-4周, 6周", "weekRange": [[2, 4], 6], "location": "EII-213", "type": "lab" },
+        { "name": "超低功耗系统设计实践", "teacher": "白小平", "weeks": "7-8周, 11-12周", "weekRange": [[7, 8], [11, 12]], "location": "EII-213", "type": "practice" }
+      ],
+      [
+        { "name": "智能小车控制器设计综合实验", "teacher": "董春云", "weeks": "11周, 15周", "weekRange": [11, 15], "location": "EII-502", "type": "lab" },
+        { "name": "智能化仪表设计综合实验", "teacher": "白宁宁", "weeks": "12-14周", "weekRange": [[12, 14]], "location": "EII-502", "type": "lab" }
+      ]
+    ],
+    [
+      [{ "name": "数字信号处理", "teacher": "董绍锋", "weeks": "1-5, 7-9周", "weekRange": [[1, 5], [7, 9]], "location": "信远I-316", "type": "theory" }],
+      [],
+      [{ "name": "数字信号处理", "teacher": "董绍锋", "weeks": "1-7, 10周", "weekRange": [[1, 7], 10], "location": "信远I-316", "type": "theory" }],
+      [{ "name": "虚拟仪器设计", "teacher": "贺华", "weeks": "9-15周", "weekRange": [[9, 15]], "location": "信远I-407", "type": "theory" }],
+      [{ "name": "频率合成技术", "teacher": "孙璐", "weeks": "10-13周", "weekRange": [[10, 13]], "location": "信远I-220", "type": "theory" }],
+      [
+        { "name": "单片机测量设计实验", "teacher": "白小平", "weeks": "2-4周, 6周", "weekRange": [[2, 4], 6], "location": "EII-213", "type": "lab" },
+        { "name": "超低功耗系统设计实践", "teacher": "白小平", "weeks": "7-8周, 11-12周", "weekRange": [[7, 8], [11, 12]], "location": "EII-213", "type": "practice" }
+      ],
+      [
+        { "name": "智能小车控制器设计综合实验", "teacher": "董春云", "weeks": "11周, 15周", "weekRange": [11, 15], "location": "EII-502", "type": "lab" },
+        { "name": "智能化仪表设计综合实验", "teacher": "白宁宁", "weeks": "12-14周", "weekRange": [[12, 14]], "location": "EII-502", "type": "lab" }
+      ]
+    ],
+    [
+      [],
+      [{ "name": "微波电子技术", "teacher": "郝延红", "weeks": "1-7周, 10周", "weekRange": [[1, 7], 10], "location": "信远I-321", "type": "theory" }],
+      [],
+      [
+        { "name": "微波电子技术", "teacher": "郝延红", "weeks": "1-8周", "weekRange": [[1, 8]], "location": "信远I-321", "type": "theory" },
+        { "name": "光电检测技术", "teacher": "李仙丽", "weeks": "9-11周", "weekRange": [[9, 11]], "location": "信远I-417", "type": "theory" },
+        { "name": "自动测试技术", "teacher": "贺华", "weeks": "12周", "weekRange": 12, "location": "信远I-407", "type": "theory" }
+      ],
+      [{ "name": "就业指导", "teacher": "张一驰", "weeks": "10-13周", "weekRange": [[10, 13]], "location": "信远I-317", "type": "general" }],
+      [
+        { "name": "单片机测量设计实验", "teacher": "白小平", "weeks": "2-4周, 6周", "weekRange": [[2, 4], 6], "location": "EII-213", "type": "lab" },
+        { "name": "超低功耗系统设计实践", "teacher": "白小平", "weeks": "7-8周, 11-12周", "weekRange": [[7, 8], [11, 12]], "location": "EII-213", "type": "practice" }
+      ],
+      [
+        { "name": "智能小车控制器设计综合实验", "teacher": "董春云", "weeks": "11周, 15周", "weekRange": [11, 15], "location": "EII-502", "type": "lab" },
+        { "name": "智能化仪表设计综合实验", "teacher": "白宁宁", "weeks": "12-14周", "weekRange": [[12, 14]], "location": "EII-502", "type": "lab" }
+      ]
+    ],
+    [
+      [{ "name": "频率合成技术", "teacher": "孙璐", "weeks": "1-5, 7-9, 11-12周", "weekRange": [[1, 5], [7, 9], [11, 12]], "location": "信远I-220", "type": "theory" }],
+      [],
+      [],
+      [{ "name": "自动测试技术", "teacher": "贺华", "weeks": "1-15周", "weekRange": [[1, 15]], "location": "信远I-407", "type": "theory" }],
+      [{ "name": "大学体育(VI)", "teacher": "詹歌", "weeks": "全学期", "weekRange": "全学期", "location": "乒乓球场", "type": "pe" }],
+      [
+        { "name": "单片机测量设计实验", "teacher": "白小平", "weeks": "2-4周, 6周", "weekRange": [[2, 4], 6], "location": "EII-213", "type": "lab" },
+        { "name": "超低功耗系统设计实践", "teacher": "白小平", "weeks": "7-8周, 11-12周", "weekRange": [[7, 8], [11, 12]], "location": "EII-213", "type": "practice" }
+      ],
+      [
+        { "name": "智能小车控制器设计综合实验", "teacher": "董春云", "weeks": "11周, 15周", "weekRange": [11, 15], "location": "EII-502", "type": "lab" },
+        { "name": "智能化仪表设计综合实验", "teacher": "白宁宁", "weeks": "12-14周", "weekRange": [[12, 14]], "location": "EII-502", "type": "lab" }
+      ]
+    ],
+    [
+      [{ "name": "就业指导", "teacher": "张一驰", "weeks": "9周, 11-13周", "weekRange": [9, [11, 13]], "location": "信远I-317", "type": "general" }],
+      [],
+      [],
+      [{ "name": "自动测试技术系统设计实践与交流", "teacher": "贺华", "weeks": "仅第9周", "weekRange": 9, "location": "(关注通知)", "type": "practice" }],
+      [],
+      [],
+      [
+        { "name": "智能小车控制器设计综合实验", "teacher": "董春云", "weeks": "11周, 15周", "weekRange": [11, 15], "location": "EII-502", "type": "lab" },
+        { "name": "智能化仪表设计综合实验", "teacher": "白宁宁", "weeks": "12-14周", "weekRange": [[12, 14]], "location": "EII-502", "type": "lab" }
+      ]
+    ]
+  ]
+}

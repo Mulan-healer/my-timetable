@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人课表 - 2025-2026学年 第二学期</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+        }
+        #fixed-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* 确保在最底层 */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%), 
+                        radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 40%);
+        }
+        .glass-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .course-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-width: 0 0 0 4px;
+        }
+        .course-card:hover {
+            transform: scale(1.03) translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+        }
+        .day-header {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .course-type-theory { border-color: #60a5fa; background-color: rgba(239, 246, 255, 0.8); }
+        .course-type-lab { border-color: #34d399; background-color: rgba(236, 253, 245, 0.8); }
+        .course-type-practice { border-color: #fbbf24; background-color: rgba(255, 251, 235, 0.8); }
+        .course-type-general { border-color: #a78bfa; background-color: rgba(245, 243, 255, 0.8); }
+        .course-type-pe { border-color: #f472b6; background-color: rgba(253, 242, 248, 0.8); }
+        
+        /* 隐藏滚动条但保持功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* --- 移动端性能优化专用代码 --- */ 
+        @media (max-width: 768px) { 
+            /* 1. 针对主容器：移除毛玻璃，改用纯色背景，减弱阴影 */ 
+            .glass-container { 
+                /* 强制覆盖原有的模糊效果 */ 
+                backdrop-filter: none !important; 
+                -webkit-backdrop-filter: none !important; 
+
+                /* 使用高不透明度的白色，遮挡下方内容，模拟模糊后的视觉隔离感 */ 
+                background: rgba(255, 255, 255, 0.98) !important; 
+
+                /* 减弱阴影：减少扩散半径，降低透明度 */ 
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03) !important; 
+
+                /* 移除边框以减少渲染层级（可选） */ 
+                border: none !important; 
+            } 
+
+            /* 2. 针对表头：移除模糊，改用纯色 */ 
+            .day-header { 
+                backdrop-filter: none !important; 
+                -webkit-backdrop-filter: none !important; 
+                background: #f8fafc !important; /* 使用浅灰色区分表头 */ 
+            } 
+
+            /* 3. 针对 JS 生成的左侧固定列 (节次列) */ 
+            td.sticky { 
+                backdrop-filter: none !important; 
+                -webkit-backdrop-filter: none !important; 
+                background: rgba(255, 255, 255, 0.98) !important; 
+            } 
+
+            /* 4. 针对课程卡片：移除悬浮效果和阴影 */ 
+            .course-card { 
+                box-shadow: none !important; /* 移除卡片默认阴影 */ 
+                border-left-width: 2px !important; /* 减细左侧边框 */ 
+            } 
+            .course-card:hover { 
+                transform: none !important; /* 禁止悬浮位移 */ 
+                box-shadow: none !important; 
+            } 
+
+            /* --- 移动端列显隐控制 --- */ 
+
+            /* 1. 默认逻辑：在手机上，隐藏表头(th)和内容(td)的第2列到第8列（即 Mon-Sun） */ 
+            /* 保留第1列（:first-child），那是时间列 */ 
+            table th:not(:first-child), 
+            table td:not(:first-child) { 
+                display: none; 
+            } 
+
+            /* 2. 激活逻辑：根据 table 上的类名，显示对应的那一列 */ 
+            /* .show-day-0 对应周一 (第2列)，以此类推 */ 
+            table.show-day-0 th:nth-child(2), table.show-day-0 td:nth-child(2) { display: table-cell; } 
+            table.show-day-1 th:nth-child(3), table.show-day-1 td:nth-child(3) { display: table-cell; } 
+            table.show-day-2 th:nth-child(4), table.show-day-2 td:nth-child(4) { display: table-cell; } 
+            table.show-day-3 th:nth-child(5), table.show-day-3 td:nth-child(5) { display: table-cell; } 
+            table.show-day-4 th:nth-child(6), table.show-day-4 td:nth-child(6) { display: table-cell; } 
+            table.show-day-5 th:nth-child(7), table.show-day-5 td:nth-child(7) { display: table-cell; } 
+            table.show-day-6 th:nth-child(8), table.show-day-6 td:nth-child(8) { display: table-cell; } 
+
+            /* 3. 布局调整：让显示出来的表格占满屏幕宽度 */ 
+            table { 
+                min-width: 0 !important; /* 覆盖原本的 min-w-[1100px] */ 
+                width: 100% !important; 
+            } 
+
+            /* 4. 微调单元格间距，手机上紧凑一点 */ 
+            td, th { 
+                padding: 10px !important; /* 覆盖 p-6 */ 
+            } 
+        } 
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen">
+    <div id="fixed-background"></div>
+    <div id="capture-area" class="max-w-7xl mx-auto glass-container p-4 md:p-8 rounded-3xl transition-all duration-500">
+        <!-- Header -->
+        <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <div class="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold mb-3 tracking-wider uppercase">Academic Schedule</div>
+                <h1 class="text-4xl font-black text-gray-900 tracking-tight">2025-2026学年 第二学期</h1>
+                <div class="flex items-center gap-2 mt-2 text-gray-500">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p class="text-sm font-medium">个人课表 · 现代磨砂版</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3 bg-white/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/50 shadow-sm no-export">
+                    <label for="week-select" class="text-xs font-bold text-gray-500 uppercase tracking-tighter">View Week</label>
+                    <select id="week-select" class="bg-transparent border-none focus:ring-0 text-blue-600 font-bold text-sm cursor-pointer">
+                        <!-- Options will be added by JS -->
+                    </select>
+                </div>
+                <button id="export-btn" class="group flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-2xl shadow-xl hover:bg-gray-800 transition-all active:scale-95 font-bold text-sm no-export">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    保存课表
+                </button>
+            </div>
+        </header>
+
+        <!-- Timetable -->
+        <!-- Mobile Day Selector (仅移动端显示) --> 
+        <div class="mb-4 flex overflow-x-auto pb-2 gap-2 md:hidden no-scrollbar" id="mobile-day-selector"> 
+            <button onclick="switchMobileDay(0)" class="mobile-day-btn active px-4 py-2 rounded-xl bg-blue-500 text-white text-xs font-bold whitespace-nowrap shadow-lg ring-2 ring-blue-300">Mon</button> 
+            <button onclick="switchMobileDay(1)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-gray-500 text-xs font-bold whitespace-nowrap border border-gray-200">Tue</button> 
+            <button onclick="switchMobileDay(2)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-gray-500 text-xs font-bold whitespace-nowrap border border-gray-200">Wed</button> 
+            <button onclick="switchMobileDay(3)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-gray-500 text-xs font-bold whitespace-nowrap border border-gray-200">Thu</button> 
+            <button onclick="switchMobileDay(4)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-gray-500 text-xs font-bold whitespace-nowrap border border-gray-200">Fri</button> 
+            <button onclick="switchMobileDay(5)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-blue-400 text-xs font-bold whitespace-nowrap border border-gray-200">Sat</button> 
+            <button onclick="switchMobileDay(6)" class="mobile-day-btn px-4 py-2 rounded-xl bg-white text-red-400 text-xs font-bold whitespace-nowrap border border-gray-200">Sun</button> 
+        </div> 
+        <div class="overflow-x-auto rounded-3xl shadow-2xl border border-white/40 bg-white/20 backdrop-blur-sm no-scrollbar">
+            <table class="w-full border-collapse min-w-[1100px]">
+                <thead>
+                    <tr class="text-left">
+                        <th class="w-24 p-6 day-header sticky left-0 z-30 border-b border-white/20 text-xs font-black text-gray-400 uppercase tracking-widest">Period</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700">MON</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700">TUE</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700">WED</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700">THU</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700">FRI</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700 text-blue-500">SAT</th>
+                        <th class="p-6 day-header border-b border-white/20 text-sm font-black text-gray-700 text-red-500">SUN</th>
+                    </tr>
+                </thead>
+                <tbody id="timetable-body">
+                    <!-- Rows will be added by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-10 flex flex-wrap gap-6 justify-center">
+            <div class="flex items-center gap-3 bg-white/30 px-4 py-2 rounded-xl border border-white/40 text-xs font-bold text-gray-600">
+                <span class="w-3 h-3 rounded-full shadow-sm bg-blue-400"></span> 理论课程
+            </div>
+            <div class="flex items-center gap-3 bg-white/30 px-4 py-2 rounded-xl border border-white/40 text-xs font-bold text-gray-600">
+                <span class="w-3 h-3 rounded-full shadow-sm bg-emerald-400"></span> 实验教学
+            </div>
+            <div class="flex items-center gap-3 bg-white/30 px-4 py-2 rounded-xl border border-white/40 text-xs font-bold text-gray-600">
+                <span class="w-3 h-3 rounded-full shadow-sm bg-amber-400"></span> 实践环节
+            </div>
+            <div class="flex items-center gap-3 bg-white/30 px-4 py-2 rounded-xl border border-white/40 text-xs font-bold text-gray-600">
+                <span class="w-3 h-3 rounded-full shadow-sm bg-violet-400"></span> 通识课程
+            </div>
+            <div class="flex items-center gap-3 bg-white/30 px-4 py-2 rounded-xl border border-white/40 text-xs font-bold text-gray-600">
+                <span class="w-3 h-3 rounded-full shadow-sm bg-pink-400"></span> 体育锻炼
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换移动端显示的星期 (0 = 周一, 6 = 周日) 
+        function switchMobileDay(dayIndex) { 
+            const table = document.querySelector('table'); 
+
+            // 1. 移除旧的 show-day-x 类 
+            table.classList.forEach(cls => { 
+                if (cls.startsWith('show-day-')) { 
+                    table.classList.remove(cls); 
+                } 
+            }); 
+
+            // 2. 添加新的类 
+            table.classList.add(`show-day-${dayIndex}`); 
+
+            // 3. 更新按钮样式 (高亮当前选中) 
+            const buttons = document.querySelectorAll('.mobile-day-btn'); 
+            buttons.forEach((btn, idx) => { 
+                if (idx === dayIndex) { 
+                    // 选中状态样式 
+                    btn.className = 'mobile-day-btn active px-4 py-2 rounded-xl bg-blue-500 text-white text-xs font-bold whitespace-nowrap shadow-lg ring-2 ring-blue-300 transition-all'; 
+                } else { 
+                    // 未选中状态样式 
+                    btn.className = 'mobile-day-btn px-4 py-2 rounded-xl bg-white text-gray-500 text-xs font-bold whitespace-nowrap border border-gray-200 transition-all'; 
+                } 
+            }); 
+        } 
+
+        let timetableData = null;
+
+        async function init() {
+            try {
+                const response = await fetch('schedule.json');
+                timetableData = await response.json();
+                
+                // 自动计算当前周次
+                // 假设开学日期为 2026-03-02 (周一)
+                const termStartDate = new Date('2026-03-02');
+                const today = new Date();
+                const diffTime = today - termStartDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                let currentWeek = Math.floor(diffDays / 7) + 1;
+                
+                // 限制周次在有效范围内 (1-20周)，否则默认显示“全部周”
+                if (currentWeek < 1 || currentWeek > 20) {
+                    currentWeek = 0;
+                }
+
+                // 初始化周次切换逻辑
+                const weekSelect = document.getElementById('week-select');
+                weekSelect.innerHTML = ''; // 清空现有选项
+
+                // 添加“全部周”选项
+                const allOption = document.createElement('option');
+                allOption.value = 0;
+                allOption.textContent = `全部周 (全局显示)`;
+                weekSelect.appendChild(allOption);
+
+                // 添加 1-20 周选项
+                for (let i = 1; i <= 20; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    let text = `第 ${i} 周`;
+                    if (i === currentWeek) {
+                        text += ' (当前周)';
+                    }
+                    option.textContent = text;
+                    weekSelect.appendChild(option);
+                }
+
+                weekSelect.value = currentWeek;
+                weekSelect.addEventListener('change', (e) => {
+                    renderTimetable(parseInt(e.target.value));
+                });
+
+                // 初始渲染
+                renderTimetable(currentWeek);
+
+                // 初始化移动端视图： 
+                // 如果今天是周六或周日，显示对应天；否则默认显示今天（周一到周五） 
+                const jsDay = new Date().getDay(); 
+                // 转换：周日(0) -> 6, 周一(1) -> 0, ... 
+                const initialDayIndex = jsDay === 0 ? 6 : jsDay - 1; 
+                switchMobileDay(initialDayIndex);
+            } catch (error) {
+                console.error('加载课表数据失败:', error);
+                document.getElementById('timetable-body').innerHTML = `
+                    <tr>
+                        <td colspan="8" class="p-8 text-center text-red-500">
+                            数据加载失败，请确保 schedule.json 文件存在且格式正确。
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function isWeekActive(weekRange, currentWeek) {
+            if (currentWeek === 0) return true; // 0 代表“全部周”
+            if (weekRange === "全学期") return true;
+            
+            // 将数据统一为数组处理
+            const ranges = Array.isArray(weekRange) ? weekRange : [weekRange];
+            
+            return ranges.some(range => {
+                if (Array.isArray(range)) {
+                    // 处理 [start, end] 格式
+                    return currentWeek >= range[0] && currentWeek <= range[1];
+                }
+                // 处理单周格式
+                return currentWeek === range;
+            });
+        }
+
+        function renderTimetable(selectedWeek) {
+            const tbody = document.getElementById('timetable-body');
+            tbody.innerHTML = '';
+
+            timetableData.periods.forEach((period, pIdx) => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50 transition-colors';
+                
+                // Period column
+                const periodTd = document.createElement('td');
+                periodTd.className = 'p-6 sticky left-0 z-20 border-r border-white/20 bg-white/95 md:bg-white/40 md:backdrop-blur-md text-center';
+                periodTd.innerHTML = `
+                    <div class="font-black text-gray-800 text-lg tracking-tighter">${period.name}</div>
+                    <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-wider">${period.time}</div>
+                `;
+                row.appendChild(periodTd);
+
+                // Days columns
+                for (let dIdx = 0; dIdx < 7; dIdx++) {
+                    const td = document.createElement('td');
+                    td.className = 'p-4 vertical-top min-w-[160px] border-r border-white/10 last:border-r-0';
+                    
+                    const courses = timetableData.schedule[pIdx][dIdx];
+                    courses.forEach(course => {
+                        const isActive = isWeekActive(course.weekRange, selectedWeek);
+                        const isAllWeeksMode = selectedWeek === 0;
+                        const card = document.createElement('div');
+                        
+                        const activeClass = isActive 
+                            ? `course-type-${course.type} opacity-100 ring-1 ring-white/30 shadow-md` 
+                            : 'bg-white/10 text-gray-400 border-dashed border-gray-300 opacity-40 grayscale-[0.5]';
+
+                        card.className = `course-card p-4 rounded-2xl mb-3 text-sm border ${activeClass}`;
+                        
+                        card.innerHTML = `
+                            <div class="font-black mb-2 leading-tight ${isActive ? 'text-gray-900' : 'text-gray-400'}">${course.name}</div>
+                            <div class="space-y-1.5">
+                                <div class="flex items-center text-[11px] font-bold opacity-80">
+                                    <svg class="w-3 h-3 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                    <span class="truncate">${course.teacher}</span>
+                                </div>
+                                <div class="flex items-center text-[11px] font-bold opacity-80">
+                                    <svg class="w-3 h-3 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span class="truncate">${course.location}</span>
+                                </div>
+                                <div class="flex items-center text-[10px] font-black uppercase tracking-wider opacity-60">
+                                    <svg class="w-3 h-3 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <span>${course.weeks}</span>
+                                </div>
+                            </div>
+                        `;
+                        td.appendChild(card);
+                    });
+                    
+                    if (courses.length === 0) {
+                        td.innerHTML = '<div class="h-full min-h-[100px] flex items-center justify-center text-gray-400/30 font-black text-[10px] tracking-widest uppercase">Free</div>';
+                    }
+                    
+                    row.appendChild(td);
+                }
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize week selector
+        const weekSelect = document.getElementById('week-select');
+        
+        // Add "All Weeks" option
+        const allOption = document.createElement('option');
+        allOption.value = 0;
+        allOption.textContent = `全部周 (全局显示)`;
+        weekSelect.appendChild(allOption);
+
+        for (let i = 1; i <= 20; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `第 ${i} 周`;
+            if (i === 1) option.selected = true;
+            weekSelect.appendChild(option);
+        }
+
+        weekSelect.addEventListener('change', (e) => {
+            renderTimetable(parseInt(e.target.value));
+        });
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', init);
+
+        // Export as image logic
+        document.getElementById('export-btn').addEventListener('click', function() {
+            const btn = this;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                正在生成...
+            `;
+            btn.disabled = true;
+
+            // 暂时隐藏不需要导出的元素
+            const noExportElements = document.querySelectorAll('.no-export');
+            noExportElements.forEach(el => el.style.display = 'none');
+
+            const captureArea = document.getElementById('capture-area');
+            
+            // 确保背景色和内边距在导出时表现良好
+            const originalPadding = captureArea.style.padding;
+            captureArea.style.padding = '40px';
+
+            html2canvas(captureArea, {
+                scale: 2, // 提高导出图片的清晰度
+                useCORS: true,
+                backgroundColor: '#f8fafc',
+                logging: false,
+                width: captureArea.offsetWidth, // 锁定宽度
+                height: captureArea.offsetHeight, // 锁定高度
+                scrollX: -window.scrollX, // 补偿页面滚动
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const weekValue = document.getElementById('week-select').value;
+                const weekText = weekValue == 0 ? '全部周' : `第${weekValue}周`;
+                link.download = `个人课表_${weekText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // 恢复界面
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                noExportElements.forEach(el => el.style.display = '');
+                captureArea.style.padding = originalPadding;
+            }).catch(err => {
+                console.error('导出失败:', err);
+                alert('图片导出失败，请尝试手动截屏');
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                noExportElements.forEach(el => el.style.display = '');
+                captureArea.style.padding = originalPadding;
+            });
+        });
+    </script>
+</body>
+</html>
